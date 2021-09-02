@@ -1,0 +1,38 @@
+{
+  "name": "piiquantebackend",
+  "version": "1.0.0",
+  "description": "Hot back-end, it's Piiquante",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RoosDev/TonyBrondel_6_27042021.git"
+  },
+  "keywords": [
+    "piiquante",
+    "openclassrooms",
+    "p6",
+    "backend"
+  ],
+  "author": "Tony B.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RoosDev/TonyBrondel_6_27042021/issues"
+  },
+  "homepage": "https://github.com/RoosDev/TonyBrondel_6_27042021#readme",
+  "dependencies": {
+    "@angular/cli": "^12.2.4",
+    "argon2": "^0.28.2",
+    "bcrypt": "^5.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.13.8",
+    "mongoose-unique-validator": "^2.0.3",
+    "multer": "^1.4.3",
+    "nodemon": "^2.0.12"
+  }
+}
