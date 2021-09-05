@@ -21,6 +21,6 @@ router.get("/:id", auth, sauceCtrl.getOneSauce );
 router.get("", auth, sauceCtrl.getAllSauces );
 
 // Ajoute un Like ou dislike
-router.post("/:id/like", auth, sauceCtrl.createAVote );
+router.post("/:id/like", auth, sauceCtrl.addAVote );
 
 module.exports = router;
