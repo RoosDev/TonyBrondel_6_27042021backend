@@ -1,5 +1,6 @@
 // import des extensions necessaires
 const express = require("express");
+const helmet = require("helmet");
 const mongoose = require("mongoose");
 const path = require("path");
 
@@ -7,16 +8,20 @@ const path = require("path");
 const sauceRoutes = require("./routes/sauce_routes.js");
 const userRoutes = require("./routes/user_routes");
 
+// Mise en place des variables d'environnement
+const dotenv = require("dotenv");
+dotenv.config();
+// const URL_Site = process.env.URL_Site;
+const URL_MonDb = process.env.URL_DB;
+
 //paramétrage de la connexion à la DB MongoDB
 mongoose
-  .connect(
-    "mongodb+srv://sauceAdmin:ARpUjdjoPhJC4O4V@piiquantecluster.uqfpo.mongodb.net/sauceCollection?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(URL_MonDb, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 const app = express();
+app.use(helmet());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -28,16 +33,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// body parser est directement intégré à express maintenant
 app.use(express.json());
-
-// // Ajout d'une redirection en cas d'erreur 404 vers la page principale
-//  app.use((req, res) =>{
-// res.redirect(404, 'http://127.0.0.1:8081/');
-// res.status(404).redirect('http://127.0.0.1:8081/');
-// })
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/sauces", sauceRoutes);
 app.use("/api/auth", userRoutes);
+
+// Gestionnaire d'erreurs sous express
+// app.use(function(err, req, res, next) {
+//   console.error(err.stack);
+//   res.status(500).send('Something broke!');
+//   res.status(404).redirect(URL_Site);
+// });
 
 module.exports = app;
