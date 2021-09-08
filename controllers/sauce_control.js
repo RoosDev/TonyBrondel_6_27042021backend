@@ -80,110 +80,118 @@ exports.getAllSauces = (req, res, next) => {
 exports.addAVote = (req, res, next) => {
   const like = req.body.like;
   const userId = req.body.userId;
-  const sauceId = req.params.id;
-  console.log(req.body);
-  // Sauce
-  // .findOne({ _id: req.params.id });
-  // .then(
-  //   [{
-  //     // $like:{
-  //       $switch:{
-  //         branches: [
-  //           { case: { $eq: [ like , 1 ] },
-  //             then: { $inc: { likes: +1 }, $push: { usersLiked: userId } }},
+  const bookId = req.params.id;
+  
+  Book
+    .findOne({ bookId})
+    .then(
+      [{
+        $switch:{
+          branches: [
+            { case: { $eq: [ like , 1 ] },
+              then: { $inc: { likes: +1 }, $push: { usersLiked: userId } }},
 
-  //           { case: { $eq: ["$like" , -1] },
-  //             then: { $inc: { dislikes: +1 }, $push: { usersDisliked: userId } }},
+            { case: { $eq: ["$like" , -1] },
+              then: { $inc: { dislikes: +1 }, $push: { usersDisliked: userId } }},
 
-  //           { case: { $and: [ { $eq: [ "$like" , 0 ] },
-  //                             { $in: [ userId , "usersLiked" ] }]},
-  //             then: { $and: [ { $inc: { likes: -1 },
-  //                               $pull: { usersLiked: userId }}]}},
+            { case: { $and: [ { $eq: [ "$like" , 0 ] },
+                              { $in: [ userId , "usersLiked" ] }]},
+              then: { $and: [ { $inc: { likes: -1 },
+                                $pull: { usersLiked: userId }}]}},
 
-  //           { case: { $and: [ {$eq: [ "$like" , 0 ]},
-  //                             { $in: [ userId , "usersDisliked" ] }]},
-  //             then: { $inc: { dislikes: -1 }, $pull: { usersDisliked: userId }}},
-  //         ],
-  //       }
-  //     // }
-  //   }]
-  // )
+            { case: { $and: [ {$eq: [ "$like" , 0 ]},
+                              { $in: [ userId , "usersDisliked" ] }]},
+              then: { $inc: { dislikes: -1 }, $pull: { usersDisliked: userId }}},
+          ],
+        }
+      }]
+    )
+    .then(() =>
+    res.status(200).json({
+      message: "Vote enregistrée,   :( ",
+    })
+  )
+    .catch(
+      (error) =>
+        res.status(400).json({ error }) && console.log("big problem")
+    );
 
-  switch (like) {
-    case 1:
-      Sauce.updateOne(
-        { _id: req.params.id },
-        { $inc: { likes: +1 }, $push: { usersLiked: userId } }
-      )
-        .then(() =>
-          res
-            .status(200)
-            .json({ message: "Vote enregistrée,  merci pour ce like :D " })
-        )
-        .catch(
-          (error) =>
-            res.status(400).json({ error }) && console.log("big problem")
-        );
-      break;
-    case 0:
-      Sauce.findOneAndUpdate([
-        {
-          $sauceId: {
-            $switch: {
-              branches: [
-                {
-                  case: { $in: [userId, "$usersLiked"] },
-                  then: { $inc: { likes: -1 }, $pull: { usersLiked: userId } },
-                },
 
-                {
-                  case: { $in: [userId, "$usersDisliked"] },
-                  then: {
-                    $inc: { dislikes: -1 },
-                    $pull: { usersDisliked: userId },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      ])
+  // switch (like) {
+  //   case 1:
+  //     Sauce.updateOne(
+  //       { _id: req.params.id },
+  //       { $inc: { likes: +1 }, $push: { usersLiked: userId } }
+  //     )
+  //       .then(() =>
+  //         res
+  //           .status(200)
+  //           .json({ message: "Vote enregistrée,  merci pour ce like :D " })
+  //       )
+  //       .catch(
+  //         (error) =>
+  //           res.status(400).json({ error }) && console.log("big problem")
+  //       );
+  //     break;
+  //   case 0:
+  //     Sauce.findOneAndUpdate([
+  //       {
+  //         $sauceId: {
+  //           $switch: {
+  //             branches: [
+  //               {
+  //                 case: { $in: [userId, "$usersLiked"] },
+  //                 then: { $inc: { likes: -1 }, $pull: { usersLiked: userId } },
+  //               },
 
-        // // une version bancale niveau fonctionnement
-        //       .updateOne(
-        //           { _id: req.params.id, usersLiked: {$in: [userId] } },
-        //           { $inc: { likes: -1},
-        //             $pull: {usersLiked: userId}},
-        //         )
-        //         .updateOne(
-        //           { _id: req.params.id, usersDisliked: {$in: [userId]} },
-        //           { $inc: { dislikes: -1},
-        //             $pull: {usersDisliked: userId}},
-        //         )
-        .then(() =>
-          res
-            .status(200)
-            .json({ message: "Vous avez changé d'avis, c'est noté :( " })
-        )
-        .catch((error) => res.status(400).json({ error }));
+  //               {
+  //                 case: { $in: [userId, "$usersDisliked"] },
+  //                 then: {
+  //                   $inc: { dislikes: -1 },
+  //                   $pull: { usersDisliked: userId },
+  //                 },
+  //               },
+  //             ],
+  //           },
+  //         },
+  //       },
+  //     ])
 
-      break;
-    case -1:
-      Sauce.updateOne(
-        { _id: req.params.id },
-        { $inc: { dislikes: +1 }, $push: { usersDisliked: userId } }
-      )
-        .then(() =>
-          res.status(200).json({
-            message: "Vote enregistrée, désolé que vous n'aimiez pas  :( ",
-          })
-        )
-        .catch(
-          (error) =>
-            res.status(400).json({ error }) && console.log("big problem")
-        );
-      break;
-    default:
-      console.log(err);
-  }
+  //       // // une version bancale niveau fonctionnement
+  //       //       .updateOne(
+  //       //           { _id: req.params.id, usersLiked: {$in: [userId] } },
+  //       //           { $inc: { likes: -1},
+  //       //             $pull: {usersLiked: userId}},
+  //       //         )
+  //       //         .updateOne(
+  //       //           { _id: req.params.id, usersDisliked: {$in: [userId]} },
+  //       //           { $inc: { dislikes: -1},
+  //       //             $pull: {usersDisliked: userId}},
+  //       //         )
+  //       .then(() =>
+  //         res
+  //           .status(200)
+  //           .json({ message: "Vous avez changé d'avis, c'est noté :( " })
+  //       )
+  //       .catch((error) => res.status(400).json({ error }));
+
+  //     break;
+  //   case -1:
+  //     Sauce.updateOne(
+  //       { _id: req.params.id },
+  //       { $inc: { dislikes: +1 }, $push: { usersDisliked: userId } }
+  //     )
+  //       .then(() =>
+  //         res.status(200).json({
+  //           message: "Vote enregistrée, désolé que vous n'aimiez pas  :( ",
+  //         })
+  //       )
+  //       .catch(
+  //         (error) =>
+  //           res.status(400).json({ error }) && console.log("big problem")
+  //       );
+  //     break;
+  //   default:
+  //     console.log(err);
+  // }
 };
